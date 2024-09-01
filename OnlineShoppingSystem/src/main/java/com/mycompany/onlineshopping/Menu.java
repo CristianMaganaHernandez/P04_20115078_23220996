@@ -34,41 +34,45 @@ class Menu {
             new Item("Moon Cheesecake", 4.99)
         };
     }
-
-public void showMenu() {
-    System.out.println("*** Welcome to Pizza Planet Pizzeria ***");
-    System.out.println("----- Menu -----");
-    for (int index = 0; index < products.length; index++) {
-        Product currentItem = products[index];
-         System.out.println((index + 1) + ". " + currentItem.getDescription());
+    
+    public Product[] getProducts(){
+        return products;
     }
-}
 
-public void handleUserInput() {
-    while (true) {
-        showMenu();
-        System.out.print("Please select an option ('x' to checkout): ");
-        String input = scanner.nextLine().trim();
-
-        if (input.equalsIgnoreCase("x")) {
-            checkout();
-            return; // Exit after checkout
+    public void showMenu() {
+        System.out.println("*** Welcome to Pizza Planet Pizzeria ***");
+        System.out.println("----- Menu -----");
+        for (int index = 0; index < products.length; index++) {
+            Product currentItem = products[index];
+            System.out.println((index + 1) + ". " + currentItem.getDescription());
         }
+    }
 
-        try {
-            int choice = Integer.parseInt(input);
+    public void handleUserInput() {
+        while (true) {
+            showMenu();
+            System.out.print("Please select an option ('x' to checkout): ");
+            String input = scanner.nextLine().trim();
 
-            if (choice > 0 && choice <= products.length) {
-                cart.addItem(products[choice - 1]);
-                System.out.println("Item added to cart.");
-            } else {
+            if (input.equalsIgnoreCase("x")) {
+                checkout();
+                return; // Exit after checkout
+            }
+
+            try {
+                int choice = Integer.parseInt(input);
+
+                if (choice > 0 && choice <= products.length) {
+                    cart.addItem(products[choice - 1]);
+                    System.out.println("Item added to cart.");
+                } else {
+                    System.out.println("Invalid choice. Please try again.");
+                }
+            } catch (NumberFormatException e) {
                 System.out.println("Invalid choice. Please try again.");
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid choice. Please try again.");
         }
     }
-}
 
 
     private void checkout() {
