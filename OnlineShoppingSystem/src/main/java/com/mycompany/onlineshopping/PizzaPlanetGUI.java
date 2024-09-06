@@ -273,7 +273,7 @@ public class PizzaPlanetGUI extends JFrame {
             details.append(entry.getKey()).append(" - ").append(entry.getValue()).append(" pcs\n");
         }
 
-        details.append("\nTotal Order Cost: $").append(order.getCart().getTotalPrice());
+        details.append("\nTotal Order Cost: $").append(String.format("%.2f",order.getCart().getTotalPrice()));
 
         return details.toString();
     }
