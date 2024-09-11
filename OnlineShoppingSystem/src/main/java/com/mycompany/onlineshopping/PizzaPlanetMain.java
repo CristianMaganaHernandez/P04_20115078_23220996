@@ -9,6 +9,7 @@ package com.mycompany.onlineshopping;
  * @author Santiago Viscarra
  */
 import java.util.*;
+import java.time.LocalDateTime;
 
 class PizzaPlanetMain {
     // This is the main class for running the Pizza PLanet Online shopping system
@@ -23,6 +24,7 @@ class PizzaPlanetMain {
             String name = getValidInput(scanner,"Please enter your name: ");
             String address =getValidInput(scanner,"Please enter your address: ");
             Customer customer = new Customer(name, address);
+            LocalDateTime orderDateTime = LocalDateTime.now();
 
             // Create Cart and Menu
             Cart cart = new Cart();
@@ -32,7 +34,7 @@ class PizzaPlanetMain {
             menu.handleUserInput();
 
             // Create and Save Order after Checkout
-            Order order = new Order(customer, cart);
+            Order order = new Order(customer, cart,orderDateTime);
             order.saveOrder("orders.txt");
 
             // Print Order Details

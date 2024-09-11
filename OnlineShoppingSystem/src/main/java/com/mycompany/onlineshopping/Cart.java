@@ -24,6 +24,14 @@ class Cart {
     public void addItem(Product item) {
         items.add(item);
     }
+    
+    public void removeItem(String productName){
+        for(int i=items.size()-1;i>=0;i--){
+            if (items.get(i).getProductName().equals(productName)){
+                items.remove(i);
+            }
+        }
+    }
 
     public List<Product> getItems() {
         return items;

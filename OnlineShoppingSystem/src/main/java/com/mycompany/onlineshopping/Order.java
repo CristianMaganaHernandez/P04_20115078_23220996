@@ -13,17 +13,37 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.time.LocalDateTime; // For date and time
+import java.sql.Timestamp;      // For interaction with the database
+
 
 class Order {
     // This class manages orders placed by the customer
     private final Customer customer;
     private final Cart cart;
+    private LocalDateTime orderDateTime;
 
-    public Order(Customer customer, Cart cart) {
+
+    public Order(Customer customer, Cart cart,LocalDateTime orderDateTime) {
         validateNotNull(customer, "customer");
         validateNotNull(cart, "cart");
         this.customer = customer;
         this.cart = cart;
+        this.orderDateTime = LocalDateTime.now(); 
+    }
+    
+    // getter and setter
+    public LocalDateTime getOrderDateTime() {
+        return orderDateTime;
+    }
+    
+    public void setOrderDateTime(LocalDateTime orderDateTime) {
+        this.orderDateTime = orderDateTime;
+    }
+    
+    // Method to get a Timestamp compatible with the database
+    public Timestamp getOrderTimestamp() {
+        return Timestamp.valueOf(orderDateTime);
     }
 
     public void validateNotNull(Object obj, String name) {
@@ -65,6 +85,7 @@ class Order {
                 });
         String totalPrice = String.format("%.2f", cart.getTotalPrice());
         writer.write("Total Order Cost: $" + totalPrice + "\n");
+        writer.write(this.getOrderTimestamp().toString() + "\n");
         writer.write("====================================\n");
     }
 
