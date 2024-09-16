@@ -9,10 +9,10 @@ package com.mycompany.onlineshopping;
  * @author Cristian Alejandro Magana Hernandez
  * @author Santiago Viscarra
  */
-
 import java.util.*;
 
 class Cart {
+
     // This classs represents a shooping cart that can hold a list of products
     private final List<Product> items;
 
@@ -24,11 +24,20 @@ class Cart {
     public void addItem(Product item) {
         items.add(item);
     }
-    
-    public void removeItem(String productName){
-        for(int i=items.size()-1;i>=0;i--){
-            if (items.get(i).getProductName().equals(productName)){
+
+    public void removeItem(String productName) {
+        for (int i = items.size() - 1; i >= 0; i--) {
+            if (items.get(i).getProductName().equals(productName)) {
                 items.remove(i);
+            }
+        }
+    }
+
+    public void deleteItem(String productName) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getProductName().equals(productName)) {
+                items.remove(i);
+                break;
             }
         }
     }
@@ -36,7 +45,7 @@ class Cart {
     public List<Product> getItems() {
         return items;
     }
-    
+
     public double getTotalPrice() {
         if (items.isEmpty()) {
             return 0.0;
@@ -66,4 +75,3 @@ class Cart {
         throw new NoSuchElementException("Item not found in cart: " + itemName);
     }
 }
-

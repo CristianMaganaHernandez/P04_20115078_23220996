@@ -177,106 +177,126 @@ public class PizzaPlanetGUI extends JFrame {
         return panel;
     }
 
-private JPanel createCartPanel() {
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    private JPanel createCartPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-    // Cart label
-    JLabel cartLabel = new JLabel("Your Cart", JLabel.CENTER);
-    cartLabel.setFont(new Font("Arial", Font.BOLD, 20));
-    panel.add(cartLabel, BorderLayout.NORTH);
+        // Cart label
+        JLabel cartLabel = new JLabel("Your Cart", JLabel.CENTER);
+        cartLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        panel.add(cartLabel, BorderLayout.NORTH);
 
-    // Cart items panel with BoxLayout for vertical stacking
-    cartItemsPanel = new JPanel();
-    cartItemsPanel.setLayout(new BoxLayout(cartItemsPanel, BoxLayout.Y_AXIS)); // Vertical stacking
-    cartItemsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Cart items panel with BoxLayout for vertical stacking
+        cartItemsPanel = new JPanel();
+        cartItemsPanel.setLayout(new BoxLayout(cartItemsPanel, BoxLayout.Y_AXIS)); // Vertical stacking
+        cartItemsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    // Add cartItemsPanel to a scroll pane with a fixed height
-    JScrollPane scrollPane = new JScrollPane(cartItemsPanel);
-    scrollPane.setPreferredSize(new Dimension(600, 180)); // Adjust the height to reduce the total space
-    panel.add(scrollPane, BorderLayout.CENTER);
+        // Add cartItemsPanel to a scroll pane with a fixed height
+        JScrollPane scrollPane = new JScrollPane(cartItemsPanel);
+        scrollPane.setPreferredSize(new Dimension(600, 180)); // Adjust the height to reduce the total space
+        panel.add(scrollPane, BorderLayout.CENTER);
 
-    // Total label
-    totalLabel = new JLabel("Total: $0.00", JLabel.CENTER);
-    totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
-    panel.add(totalLabel, BorderLayout.SOUTH);
+        // Total label
+        totalLabel = new JLabel("Total: $0.00", JLabel.CENTER);
+        totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        panel.add(totalLabel, BorderLayout.SOUTH);
 
-    // Bottom panel with checkout and back buttons
-    JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        // Bottom panel with checkout and back buttons
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-    JButton checkoutButton = new JButton("Checkout");
-    checkoutButton.setFont(new Font("Arial", Font.PLAIN, 16));
-    checkoutButton.setPreferredSize(new Dimension(130, 30));
-    checkoutButton.addActionListener(e -> {
-        Order order = new Order(customer, cart,orderDateTime);
-        order.saveOrder("orders.txt");
-        cardLayout.show(mainPanel, "OrderConfirmation");
-        displayOrderConfirmation(order);
-    });
-    bottomPanel.add(checkoutButton);
+        JButton checkoutButton = new JButton("Checkout");
+        checkoutButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        checkoutButton.setPreferredSize(new Dimension(150, 30));  //Preferred size
+        checkoutButton.setMinimumSize(new Dimension(130,30));   //Minimum size Need to be tested in other size of monitor
+        checkoutButton.addActionListener(e -> {
+            Order order = new Order(customer, cart, orderDateTime);
+            order.saveOrder("orders.txt");
+            cardLayout.show(mainPanel, "OrderConfirmation");
+            displayOrderConfirmation(order);
+        });
+        bottomPanel.add(checkoutButton);
 
-    JButton backButton = new JButton("Back to Menu");
-    backButton.setFont(new Font("Arial", Font.PLAIN, 16));
-    backButton.setPreferredSize(new Dimension(130, 30));
-    backButton.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
-    bottomPanel.add(backButton);
+        JButton backButton = new JButton("Back to Menu");
+        backButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        backButton.setPreferredSize(new Dimension(150, 30));  //Preferred size
+        backButton.setMinimumSize(new Dimension(130, 30));  //Minimum size Need to be tested in other size of monitor
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
+        bottomPanel.add(backButton);
 
-    panel.add(bottomPanel, BorderLayout.SOUTH);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
 
-    return panel;
-}
-
-private void updateCartPanel() {
-    cartItemsPanel.removeAll(); // Clear previous items
-
-    // Get cart items
-    Map<String, Integer> frequencyMap = cart.getItemFrequency();
-    for (Map.Entry<String, Integer> entry : frequencyMap.entrySet()) {
-        String itemName = entry.getKey();
-        int quantity = entry.getValue();
-        double itemPrice = cart.getItemPrice(itemName);
-
-        // Add each cart item to the cartItemsPanel
-        JPanel cartItemPanel = createCartItemPanel(itemName, quantity, itemPrice);
-        cartItemsPanel.add(cartItemPanel);
+        return panel;
     }
 
-    totalLabel.setText("Total Price: $" + cart.getTotalPrice());
+    private void updateCartPanel() {
+        cartItemsPanel.removeAll(); // Clear previous items
 
-    cartItemsPanel.revalidate();
-    cartItemsPanel.repaint();
-}
+        // Get cart items
+        Map<String, Integer> frequencyMap = cart.getItemFrequency();
+        for (Map.Entry<String, Integer> entry : frequencyMap.entrySet()) {
+            String itemName = entry.getKey();
+            int quantity = entry.getValue();
+            double itemPrice = cart.getItemPrice(itemName);
 
-private JPanel createCartItemPanel(String itemName, int quantity, double itemPrice) {
-    // Create a panel for each cart item
-    JPanel cartItemPanel = new JPanel(new BorderLayout());
-    cartItemPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
+            // Add each cart item to the cartItemsPanel
+            JPanel cartItemPanel = createCartItemPanel(itemName, quantity, itemPrice);
+            cartItemsPanel.add(cartItemPanel);
+        }
 
-    // Set a thinner height for the cart item panel
-    cartItemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // Reduce the height to make it thinner
-    cartItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        totalLabel.setText("Total Price: $" + cart.getTotalPrice());
 
-    // Create label to display item details
-    JLabel productLabel = new JLabel(itemName + " - " + quantity + " pcs - $" + (itemPrice * quantity) + " ( $" + itemPrice + " each )");
-    productLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-    cartItemPanel.add(productLabel, BorderLayout.CENTER);
+        cartItemsPanel.revalidate();
+        cartItemsPanel.repaint();
+    }
 
-    // Create remove button for each item
-    JButton removeButton = new JButton("Remove");
-    removeButton.setFont(new Font("Arial", Font.PLAIN, 12)); // Slightly reduce the button font size
-    removeButton.setPreferredSize(new Dimension(100, 30)); // Keep the button size consistent
+    private JPanel createCartItemPanel(String itemName, int quantity, double itemPrice) {
+        // Create a panel for each cart item
+        JPanel cartItemPanel = new JPanel(new BorderLayout());
+        cartItemPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
 
-    // Action listener for removing an item
-    removeButton.addActionListener(e -> {
-        cart.removeItem(itemName); // Remove the item from the cart
-        updateCartPanel(); // Refresh the cart display
-    });
+        // Set a thinner height for the cart item panel
+        cartItemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // Reduce the height to make it thinner
+        cartItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    cartItemPanel.add(removeButton, BorderLayout.EAST);
+        // Create label to display item details
+        JLabel productLabel = new JLabel(itemName + " - " + quantity + " pcs - $" + (itemPrice * quantity) + " ( $" + itemPrice + " each )");
+        productLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        cartItemPanel.add(productLabel, BorderLayout.CENTER);
 
-    return cartItemPanel;
-}
+        // Create a panel to hold the buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
+        // Create remove button for each item
+        JButton removeButton = new JButton("Remove");
+        removeButton.setFont(new Font("Arial", Font.PLAIN, 12)); // Slightly reduce the button font size
+        removeButton.setPreferredSize(new Dimension(80, 30)); // Keep the button size consistent
+
+        // Action listener for removing all items of a specific type
+        removeButton.addActionListener(e -> {
+            cart.removeItem(itemName); // Remove the item from the cart
+            updateCartPanel(); // Refresh the cart display
+        });
+
+        // Create delete button for removing one item at a time
+        JButton deleteButton = new JButton("Delete");
+        deleteButton.setFont(new Font("Arial", Font.PLAIN, 12)); // Slightly reduce the button font size
+        deleteButton.setPreferredSize(new Dimension(80, 30)); // Keep the button size consistent
+
+        // Action listener for deleting one item at a time
+        deleteButton.addActionListener(e -> {
+            cart.deleteItem(itemName); // Decrease item quantity by 1
+            updateCartPanel(); // Refresh the cart display
+        });
+
+        // Add both buttons to the button panel
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(removeButton);
+
+        // Add the button panel to the cart item panel
+        cartItemPanel.add(buttonPanel, BorderLayout.EAST);
+
+        return cartItemPanel;
+    }
 
     private JPanel createOrderConfirmationPanel() {
         JPanel panel = new JPanel();
@@ -324,7 +344,7 @@ private JPanel createCartItemPanel(String itemName, int quantity, double itemPri
             details.append(entry.getKey()).append(" - ").append(entry.getValue()).append(" pcs\n");
         }
 
-        details.append("\nTotal Order Cost: $").append(String.format("%.2f",order.getCart().getTotalPrice())).append("\n");
+        details.append("\nTotal Order Cost: $").append(String.format("%.2f", order.getCart().getTotalPrice())).append("\n");
         details.append(order.getOrderTimestamp());
         return details.toString();
     }
