@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 //import java.awt.event.ActionEvent;
 //import java.awt.event.ActionListener;
 import java.util.Map;
+import java.sql.*;
 
 public class PizzaPlanetGUI extends JFrame {
 
@@ -22,7 +23,12 @@ public class PizzaPlanetGUI extends JFrame {
     private JTextField nameField;
     private JTextField addressField;
 
+    private DerbyDBConnector dbConnector;
+    private int customerId; // Store the customer ID from the database
+    private int cartId; // Store the cart ID after inserting into the Cart table
+
     public PizzaPlanetGUI() {
+        dbConnector = DerbyDBConnector.getInstance();// Get the singleton instance of the database connector
         setTitle("Pizza Planet Pizzeria");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -99,6 +105,7 @@ public class PizzaPlanetGUI extends JFrame {
 
         gbc.gridy++;
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
         JButton nextButton = new JButton("Next");
         nextButton.addActionListener(e -> {
             String name = nameField.getText().trim();
@@ -107,8 +114,27 @@ public class PizzaPlanetGUI extends JFrame {
             if (name.isEmpty() || address.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter both name and address.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                customer = new Customer(name, address);
-                cardLayout.show(mainPanel, "Menu");
+                customer = new Customer(name, address); // Create a new Customer object
+
+                // Insert customer into the database and store the generated CustomerID
+                try {
+                    customerId = dbConnector.insertCustomer(name, address);
+                    if (customerId == -1) {
+                        JOptionPane.showMessageDialog(this, "Failed to insert customer.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Insert a new cart into the Cart table for this customer
+                    cartId = dbConnector.insertCart(customerId);
+                    if (cartId == -1) {
+                        JOptionPane.showMessageDialog(this, "Failed to insert cart.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+
+                cardLayout.show(mainPanel, "Menu"); // Go to the Menu screen
             }
         });
 
@@ -207,13 +233,45 @@ public class PizzaPlanetGUI extends JFrame {
         JButton checkoutButton = new JButton("Checkout");
         checkoutButton.setFont(new Font("Arial", Font.PLAIN, 16));
         checkoutButton.setPreferredSize(new Dimension(150, 30));  //Preferred size
-        checkoutButton.setMinimumSize(new Dimension(130,30));   //Minimum size Need to be tested in other size of monitor
+        checkoutButton.setMinimumSize(new Dimension(130, 30));   //Minimum size Need to be tested in other size of monitor
         checkoutButton.addActionListener(e -> {
-            Order order = new Order(customer, cart, orderDateTime);
-            order.saveOrder("orders.txt");
-            cardLayout.show(mainPanel, "OrderConfirmation");
-            displayOrderConfirmation(order);
+            try {
+                // Insert the order into the Orders table and get the generated OrderID
+                int orderId = dbConnector.insertOrder(customerId, cart.getTotalPrice());
+                System.out.println("Order ID: " + orderId); // Add debug print
+
+                // Insert each cart item into the CartItem table and the OrderItem table
+                Map<String, Integer> frequencyMap = cart.getItemFrequency();
+                for (Map.Entry<String, Integer> entry : frequencyMap.entrySet()) {
+                    String productName = entry.getKey();
+                    int quantity = entry.getValue();
+                    double itemPrice = cart.getItemPrice(productName);
+
+                    // Retrieve the ProductID from the database
+                    int productId = getProductIdFromDatabase(productName);
+                    System.out.println("Product ID: " + productId); // Add debug print
+
+                    // If the productId is valid, insert it into the CartItem and OrderItem tables
+                    if (productId != -1) {
+                        dbConnector.insertCartItem(cartId, productId, quantity);  // Insert into CartItem
+
+                        // Insert into the OrderItem table (OrderID, ProductID, Quantity)
+                        dbConnector.insertOrderItem(orderId, productId, quantity);  // Insert into OrderItem
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Product not found: " + productName, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+                // Proceed to the order confirmation page
+                Order order = new Order(customer, cart, orderDateTime);
+                order.saveOrder("orders.txt"); // Save the order to file as well
+                cardLayout.show(mainPanel, "OrderConfirmation");
+                displayOrderConfirmation(order);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         });
+
         bottomPanel.add(checkoutButton);
 
         JButton backButton = new JButton("Back to Menu");
@@ -226,6 +284,23 @@ public class PizzaPlanetGUI extends JFrame {
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    private int getProductIdFromDatabase(String productName) throws SQLException {
+        String query = "SELECT ProductID FROM Product WHERE TRIM(LOWER(Name)) = TRIM(LOWER(?))";
+        try ( PreparedStatement pstmt = dbConnector.getConnection().prepareStatement(query)) {
+            pstmt.setString(1, productName.trim().toLowerCase()); // Normalize case and trim
+            System.out.println("Querying for product: " + productName); // Add debug print
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                System.out.println("Product found: " + productName + " with ID " + rs.getInt("ProductID")); // Add debug print
+                return rs.getInt("ProductID");
+            } else {
+                System.out.println("Product not found: " + productName); // Add debug print
+            }
+        }
+        return -1; // Return -1 if the product is not found
     }
 
     private void updateCartPanel() {
@@ -353,5 +428,10 @@ public class PizzaPlanetGUI extends JFrame {
         SwingUtilities.invokeLater(() -> {
             new PizzaPlanetGUI().setVisible(true);
         });
+
+        // Register a shutdown hook to close the database connection when the program exits
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            DerbyDBConnector.getInstance().shutdownDatabase(); // Shutdown the database
+        }));
     }
 }

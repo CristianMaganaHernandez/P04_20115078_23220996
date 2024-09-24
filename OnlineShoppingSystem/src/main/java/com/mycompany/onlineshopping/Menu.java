@@ -10,6 +10,8 @@ package com.mycompany.onlineshopping;
  * @author Santiago Viscarra
  */
 import java.util.Scanner;
+import java.sql.*;
+import java.util.Map;
 
 class Menu {
     // This class represents the menu for the online shopping system.
@@ -23,17 +25,47 @@ class Menu {
         initializeProducts();
     }
 
-    private void initializeProducts() {
-        products = new Product[] {
-            new Item("Margherita Pizza", 8.99),
-            new Item("Pepperoni Pizza", 9.99),
-            new Item("Space Special Pizza", 12.99),
-            new Item("Gluten-Free Pizza", 10.99),
-            new Item("Vegan Pizza", 11.99),
-            new Item("Meteor Fries", 3.99),
-            new Item("Moon Cheesecake", 4.99)
-        };
+private void initializeProducts() {
+    products = new Product[] {
+        new Item("Margherita Pizza", 8.99),
+        new Item("Pepperoni Pizza", 9.99),
+        new Item("Space Special Pizza", 12.99),
+        new Item("Gluten-Free Pizza", 10.99),
+        new Item("Vegan Pizza", 11.99),
+        new Item("Meteor Fries", 3.99),
+        new Item("Moon Cheesecake", 4.99)
+    };
+
+    // Insert products into the database only if they do not already exist
+    try {
+        DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+        for (Product product : products) {
+            if (!productExists(dbConnector, product.getProductName())) {
+                dbConnector.insertProduct(product.getProductName(), product.getProductPrice());
+                System.out.println("Inserted product: " + product.getProductName());
+            } else {
+                System.out.println("Product already exists: " + product.getProductName());
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+}
+
+// Check if a product already exists in the database
+private boolean productExists(DerbyDBConnector dbConnector, String productName) throws SQLException {
+    String query = "SELECT COUNT(*) FROM Product WHERE Name = ?";
+    try (PreparedStatement pstmt = dbConnector.getConnection().prepareStatement(query)) {
+        pstmt.setString(1, productName);
+        try (ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0;  // Returns true if the product exists
+            }
+        }
+    }
+    return false; // Product does not exist
+}
+
     
     public Product[] getProducts(){
         return products;
@@ -63,8 +95,12 @@ class Menu {
                 int choice = Integer.parseInt(input);
 
                 if (choice > 0 && choice <= products.length) {
-                    cart.addItem(products[choice - 1]);
+                    Product selectedProduct = products[choice - 1];
+                    cart.addItem(selectedProduct);
                     System.out.println("Item added to cart.");
+                    
+                    addProductToCartTable(selectedProduct);
+                    
                 } else {
                     System.out.println("Invalid choice. Please try again.");
                 }
@@ -73,11 +109,55 @@ class Menu {
             }
         }
     }
-
-
-    private void checkout() {
-        System.out.println("Proceeding to checkout...");
-        // Checkout logic will be handled in Main class
+    
+    
+    // Add product to the CartItem table in the database
+private void addProductToCartTable(Product product) {
+    try {
+        DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+        // Add product to CartItem table in the database
+        // Assuming you have a method to insert into CartItem table
+        int orderId = 1; // Assuming an order exists or creating one before this
+        int quantity = 1; // Assuming default quantity is 1
+        dbConnector.insertCartItem(orderId, product.getProductID(), quantity); // Insert product into CartItem
+        System.out.println("Product added to CartItem table: " + product.getDescription());
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+}
+
+private void checkout() {
+    System.out.println("Proceeding to checkout...");
+
+    try {
+        DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+        
+        // Assuming customerId is available (you can modify this as needed)
+        int customerId = 1; 
+        double totalPrice = cart.getTotalPrice();
+        
+        // Insert a new order into the Orders table
+        int orderId = dbConnector.insertOrder(customerId, totalPrice);
+        if (orderId != -1) {
+            System.out.println("Order created successfully with Order ID: " + orderId);
+
+            // Now add each item from the cart into the CartItem table
+            for (Map.Entry<Product, Integer> entry : cart.getItemsWithQuantities().entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+                
+                // Make sure ProductID is used to insert into CartItem
+                dbConnector.insertCartItem(orderId, product.getProductID(), quantity);
+            }
+            System.out.println("Items added to CartItem table for order: " + orderId);
+        } else {
+            System.out.println("Failed to create order.");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+
 }
 

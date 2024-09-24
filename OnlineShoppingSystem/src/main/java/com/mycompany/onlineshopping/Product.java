@@ -12,12 +12,21 @@ package com.mycompany.onlineshopping;
 
 abstract class Product {
     // The abstract class defines the blueprint fo products in the online shopping system
+    private int productId;  
     private final String productName;
     private final double ProductPrice;
 
     public Product(String productName, double ProductPrice) {
         this.productName = productName;
         this.ProductPrice = ProductPrice;
+    }
+    
+    public int getProductID() {
+        return productId;
+    }
+ 
+    public void setProductID(int productId) {
+        this.productId = productId;
     }
 
     public String getProductName() {
