@@ -28,7 +28,18 @@ public class PizzaPlanetGUI extends JFrame {
     private int cartId; // Store the cart ID after inserting into the Cart table
 
     public PizzaPlanetGUI() {
-        dbConnector = DerbyDBConnector.getInstance();// Get the singleton instance of the database connector
+        dbConnector = DerbyDBConnector.getInstance(); // Get the singleton instance of the database connector
+
+        // Drop existing tables and recreate them at the start of the program
+//        try {
+//            dbConnector.dropTables();
+//            dbConnector.createTables();
+//        } catch (SQLException ex) {
+//            ex.printStackTrace();
+//            JOptionPane.showMessageDialog(this, "Error initializing database tables", "Database Error", JOptionPane.ERROR_MESSAGE);
+//        }
+
+        // GUI setup
         setTitle("Pizza Planet Pizzeria");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -424,14 +435,18 @@ public class PizzaPlanetGUI extends JFrame {
         return details.toString();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new PizzaPlanetGUI().setVisible(true);
-        });
+public static void main(String[] args) {
+    SwingUtilities.invokeLater(() -> {
+        new PizzaPlanetGUI().setVisible(true);
+    });
 
-        // Register a shutdown hook to close the database connection when the program exits
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            DerbyDBConnector.getInstance().shutdownDatabase(); // Shutdown the database
-        }));
-    }
+    // Register a shutdown hook to close the database connection and shutdown Derby when the program exits
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+        dbConnector.closeConnection();  // Close the database connection
+        dbConnector.shutdownDatabase(); // Shutdown the database
+    }));
+}
+
+
 }
