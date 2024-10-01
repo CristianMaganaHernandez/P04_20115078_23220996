@@ -93,6 +93,6 @@ class Order {
         int quantity = entry.getValue();
         double itemPrice = cart.getItemPrice(itemName);
         double totalPrice = itemPrice * quantity;
-        return itemName + " - " + quantity + " pcs - $" + String.format("%.2f", totalPrice) + "\n";
+        return String.format(java.util.Locale.US, "%s - %d pcs - $%.2f\n", itemName, quantity, totalPrice);
     }
 }
