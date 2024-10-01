@@ -9,8 +9,8 @@ package com.mycompany.onlineshopping;
  * @author Cristian Alejandro Magana Hernandez
  * @author Santiago Viscarra
  */
-
 class Person {
+
     // This class holds the basic details of a person, such as name and email.
     private String name;
     private String email;
@@ -28,5 +28,3 @@ class Person {
         return email;
     }
 }
-
-

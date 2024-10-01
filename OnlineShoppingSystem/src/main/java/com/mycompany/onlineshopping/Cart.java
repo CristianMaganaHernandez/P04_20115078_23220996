@@ -102,4 +102,3 @@ class Cart {
         throw new NoSuchElementException("Item not found in cart: " + itemName);
     }
 }
-

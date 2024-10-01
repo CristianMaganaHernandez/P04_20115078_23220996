@@ -3,17 +3,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.onlineshopping;
+
 /**
  *
  * @author Cristian Alejandro Magana Hernandez
  * @author Santiago Viscarra
  */
 import java.util.Map;
+
 class PrintOrder {
+
     // This class is responsible for printing order details.
     public static void printOrderDetails(Order order) {
-        System.out.println(String.format("Customer Name: %s",order.getCustomer().getName()));
-        System.out.println(String.format("Customer Address: %s",order.getCustomer().getAddress()));
+        System.out.println(String.format("Customer Name: %s", order.getCustomer().getName()));
+        System.out.println(String.format("Customer Address: %s", order.getCustomer().getAddress()));
         System.out.println("Order Items:");
 
         Map<String, Integer> itemQuantities = order.getCart().getItemFrequency();
@@ -25,8 +28,7 @@ class PrintOrder {
             System.out.println(productName + " - " + quantity + " pcs - $" + totalItemCost);
         }
 
-        System.out.println(String.format("Total Order Cost: $%.2f",order.getCart().getTotalPrice()));
+        System.out.println(String.format("Total Order Cost: $%.2f", order.getCart().getTotalPrice()));
         System.out.println(order.getOrderTimestamp().toString());
     }
 }
-

@@ -36,42 +36,39 @@ public class DerbyDBConnector {
     }
 
     // Method to shut down the database
-public void shutdownDatabase() {
-    try {
-        // Check if the connection is open before trying to shutdown
-        if (connection != null && !connection.isClosed()) {
-            if (!connection.getAutoCommit()) {
-                connection.commit();  // commit any pending transactions
+    public void shutdownDatabase() {
+        try {
+            // Check if the connection is open before trying to shutdown
+            if (connection != null && !connection.isClosed()) {
+                if (!connection.getAutoCommit()) {
+                    connection.commit();  // commit any pending transactions
+                }
+                // Now shutdown the Derby system
+                DriverManager.getConnection("jdbc:derby:;shutdown=true");
+                System.out.println("Database shut down successfully.");
             }
-            // Now shutdown the Derby system
-            DriverManager.getConnection("jdbc:derby:;shutdown=true");
-            System.out.println("Database shut down successfully.");
+        } catch (SQLException e) {
+            // Derby system shutdown will always throw an exception with SQLState "XJ015"
+            if ("XJ015".equals(e.getSQLState())) {
+                System.out.println("Derby shutdown normally.");
+            } else {
+                e.printStackTrace();
+            }
         }
-    } catch (SQLException e) {
-        // Derby system shutdown will always throw an exception with SQLState "XJ015"
-        if ("XJ015".equals(e.getSQLState())) {
-            System.out.println("Derby shutdown normally.");
-        } else {
+    }
+
+    // Method to close the connection
+    public void closeConnection() {
+        try {
+            if (!connection.getAutoCommit()) {
+                connection.commit(); // commit any open transaction
+            }
+            connection.close(); // close the connection
+            System.out.println("Connection closed.");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-}
-
-
-
-    // Method to close the connection
-public void closeConnection() {
-    try {
-        if (!connection.getAutoCommit()) {
-            connection.commit(); // commit any open transaction
-        }
-        connection.close(); // close the connection
-        System.out.println("Connection closed.");
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-}
-
 
     public void createTables() throws SQLException {
         if (!doesTableExist("PRODUCT")) {
@@ -269,5 +266,4 @@ public void closeConnection() {
             throw e;
         }
     }
-
 }

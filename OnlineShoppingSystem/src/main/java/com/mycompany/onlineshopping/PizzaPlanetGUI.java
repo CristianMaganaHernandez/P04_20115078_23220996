@@ -38,7 +38,6 @@ public class PizzaPlanetGUI extends JFrame {
 //            ex.printStackTrace();
 //            JOptionPane.showMessageDialog(this, "Error initializing database tables", "Database Error", JOptionPane.ERROR_MESSAGE);
 //        }
-
         // GUI setup
         setTitle("Pizza Planet Pizzeria");
         setSize(600, 400);
@@ -435,18 +434,16 @@ public class PizzaPlanetGUI extends JFrame {
         return details.toString();
     }
 
-public static void main(String[] args) {
-    SwingUtilities.invokeLater(() -> {
-        new PizzaPlanetGUI().setVisible(true);
-    });
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new PizzaPlanetGUI().setVisible(true);
+        });
 
-    // Register a shutdown hook to close the database connection and shutdown Derby when the program exits
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-        DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
-        dbConnector.closeConnection();  // Close the database connection
-        dbConnector.shutdownDatabase(); // Shutdown the database
-    }));
-}
-
-
+        // Register a shutdown hook to close the database connection and shutdown Derby when the program exits
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+            dbConnector.closeConnection();  // Close the database connection
+            dbConnector.shutdownDatabase(); // Shutdown the database
+        }));
+    }
 }

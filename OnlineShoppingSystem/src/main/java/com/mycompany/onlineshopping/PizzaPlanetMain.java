@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.onlineshopping;
+
 /**
  *
  * @author Cristian Alejandro Magana Hernandez
@@ -12,6 +13,7 @@ import java.util.*;
 import java.time.LocalDateTime;
 
 class PizzaPlanetMain {
+
     // This is the main class for running the Pizza PLanet Online shopping system
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -21,8 +23,8 @@ class PizzaPlanetMain {
             intro.displayIntroduction();
 
             // Get Shopper Information
-            String name = getValidInput(scanner,"Please enter your name: ");
-            String address =getValidInput(scanner,"Please enter your address: ");
+            String name = getValidInput(scanner, "Please enter your name: ");
+            String address = getValidInput(scanner, "Please enter your address: ");
             Customer customer = new Customer(name, address);
             LocalDateTime orderDateTime = LocalDateTime.now();
 
@@ -34,24 +36,24 @@ class PizzaPlanetMain {
             menu.handleUserInput();
 
             // Create and Save Order after Checkout
-            Order order = new Order(customer, cart,orderDateTime);
+            Order order = new Order(customer, cart, orderDateTime);
             order.saveOrder("orders.txt");
 
             // Print Order Details
             PrintOrder.printOrderDetails(order);
             scanner.close();
-        } catch(Exception e){
+        } catch (Exception e) {
             System.out.println(" An Unexpected error has occured!");
         }
     }
-    public static String getValidInput(Scanner scanner, String prompt){
-        System.out.println(prompt);     
+
+    public static String getValidInput(Scanner scanner, String prompt) {
+        System.out.println(prompt);
         String input = scanner.nextLine().trim();
-        while(input.isEmpty()){
+        while (input.isEmpty()) {
             System.out.println("Input cannot be empty please try again!");
             input = scanner.nextLine().trim();
         }
         return input;
     }
 }
-

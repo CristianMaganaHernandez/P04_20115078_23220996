@@ -12,6 +12,7 @@ package com.mycompany.onlineshopping;
 import java.io.*;
 
 class Introduction {
+
     private final String filePath;
 
     public Introduction(String filePath) {
@@ -34,4 +35,3 @@ class Introduction {
         }
     }
 }
-
