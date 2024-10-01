@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ProductTest {
 
-    // Concrete subclass to test the abstract Product class
     class ProductImpl extends Product {
+
         public ProductImpl(String productName, double productPrice) {
             super(productName, productPrice);
         }
@@ -34,66 +34,56 @@ public class ProductTest {
 
     @BeforeAll
     public static void setUpClass() {
-        System.out.println("Starting tests for Product class.");
+        System.out.println("Starting tests for the Product class.");
     }
 
     @AfterAll
     public static void tearDownClass() {
-        System.out.println("Finished tests for Product class.");
+        System.out.println("Finished tests for the Product class.");
     }
 
-    /**
-     * Test of getProductID method, of class Product.
-     */
     @Test
     public void testGetProductID() {
+        System.out.println("testGetProductID");
         product = new ProductImpl("Test Product", 10.99);
-        product.setProductID(1234);
-        int expResult = 1234;
-        int result = product.getProductID();
-        assertEquals(expResult, result);
+        product.setProductID(1234);  // Setting a product ID
+        int expResult = 1234;        // Expected result
+        int result = product.getProductID();  // Actual result from method
+        assertEquals(expResult, result, "The Product ID should be 1234.");
     }
 
-    /**
-     * Test of setProductID method, of class Product.
-     */
     @Test
     public void testSetProductID() {
+        System.out.println("testSetProductID");
         product = new ProductImpl("Test Product", 10.99);
-        product.setProductID(5678);
-        assertEquals(5678, product.getProductID());
+        product.setProductID(5678);  // Setting a new product ID
+        assertEquals(5678, product.getProductID(), "The Product ID should be 5678.");
     }
 
-    /**
-     * Test of getProductName method, of class Product.
-     */
     @Test
     public void testGetProductName() {
+        System.out.println("testGetProductName");
         product = new ProductImpl("Test Product", 10.99);
-        String expResult = "Test Product";
-        String result = product.getProductName();
-        assertEquals(expResult, result);
+        String expResult = "Test Product";  // Expected product name
+        String result = product.getProductName();  // Actual product name from method
+        assertEquals(expResult, result, "The product name should be 'Test Product'.");
     }
 
-    /**
-     * Test of getProductPrice method, of class Product.
-     */
     @Test
     public void testGetProductPrice() {
+        System.out.println("testGetProductPrice");
         product = new ProductImpl("Test Product", 10.99);
-        double expResult = 10.99;
-        double result = product.getProductPrice();
-        assertEquals(expResult, result, 0.01);  // delta to handle floating-point precision
+        double expResult = 10.99;  // Expected product price
+        double result = product.getProductPrice();  // Actual product price from method
+        assertEquals(expResult, result, 0.01, "The product price should be 10.99.");
     }
 
-    /**
-     * Test of getDescription method, of class Product.
-     */
     @Test
     public void testGetDescription() {
+        System.out.println("testGetDescription");
         product = new ProductImpl("Test Product", 10.99);
-        String expResult = "This is a test product.";
-        String result = product.getDescription();
-        assertEquals(expResult, result);
+        String expResult = "This is a test product.";  // Expected description
+        String result = product.getDescription();  // Actual description from method
+        assertEquals(expResult, result, "The product description should be 'This is a test product.'");
     }
 }
