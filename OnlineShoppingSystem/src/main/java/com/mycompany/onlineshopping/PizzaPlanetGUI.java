@@ -27,6 +27,11 @@ public class PizzaPlanetGUI extends JFrame {
     private int customerId; // Store the customer ID from the database
     private int cartId; // Store the cart ID after inserting into the Cart table
 
+    // Variables añadidas
+    private JLabel cartIconLabel;
+    private JLabel cartCounterLabel;
+    private int cartCounter = 0; // Inicializar el contador de productos del carrito
+
     public PizzaPlanetGUI() {
         dbConnector = DerbyDBConnector.getInstance(); // Get the singleton instance of the database connector
 
@@ -178,6 +183,24 @@ public class PizzaPlanetGUI extends JFrame {
         menuLabel.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(menuLabel, BorderLayout.NORTH);
 
+        //Trolley panel with counter in upper right corner
+        JPanel cartPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        //Upload cart image with reduced size
+        ImageIcon cartIcon = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("CART.jpeg"))
+                .getImage().getScaledInstance(40, 30, Image.SCALE_SMOOTH));
+        cartIconLabel = new JLabel(cartIcon);  //Apply the scaling icon
+
+        cartCounterLabel = new JLabel(String.valueOf(cartCounter)); //Initialise the counter to 0
+        cartCounterLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        cartCounterLabel.setForeground(Color.BLACK); //Colour of the counter in black
+
+        //First add the image and then the counter so it is on the right side
+        cartPanel.add(cartIconLabel);
+        cartPanel.add(cartCounterLabel);
+
+        panel.add(cartPanel, BorderLayout.NORTH); //Add cart panel at top right
+
         JPanel itemsPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // Two columns for products
         for (Product product : menu.getProducts()) {
             JPanel productPanel = new JPanel();
@@ -186,7 +209,10 @@ public class PizzaPlanetGUI extends JFrame {
 
             JLabel productLabel = new JLabel();
             JButton addButton = new JButton("Add to Cart");
-            addButton.addActionListener(e -> cart.addItem(product));
+            addButton.addActionListener(e -> {
+                cart.addItem(product);
+                updateCartCounter(); //Update the counter when adding a product
+            });
 
             productPanel.add(productLabel);
             productPanel.add(Box.createVerticalStrut(5));
@@ -211,6 +237,12 @@ public class PizzaPlanetGUI extends JFrame {
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    //Method to update cart counter
+    private void updateCartCounter() {
+        cartCounter++; //Increment the cart counter
+        cartCounterLabel.setText(String.valueOf(cartCounter));//Update the counter's JLabel
     }
 
     private JPanel createCartPanel() {
