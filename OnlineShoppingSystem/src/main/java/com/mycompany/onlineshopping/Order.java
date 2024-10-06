@@ -14,7 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.time.LocalDateTime; // For date and time
-import java.sql.Timestamp;      // For interaction with the database
+import java.time.format.DateTimeFormatter;
 
 class Order {
 
@@ -41,8 +41,9 @@ class Order {
     }
 
     // Method to get a Timestamp compatible with the database
-    public Timestamp getOrderTimestamp() {
-        return Timestamp.valueOf(orderDateTime);
+    public String getFormattedOrderTimestamp() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return orderDateTime.format(formatter);  // Format without fractional seconds
     }
 
     public void validateNotNull(Object obj, String name) {
@@ -84,7 +85,7 @@ class Order {
                 });
         String totalPrice = String.format("%.2f", cart.getTotalPrice());
         writer.write("Total Order Cost: $" + totalPrice + "\n");
-        writer.write(this.getOrderTimestamp().toString() + "\n");
+        writer.write(getFormattedOrderTimestamp() + "\n");
         writer.write("====================================\n");
     }
 

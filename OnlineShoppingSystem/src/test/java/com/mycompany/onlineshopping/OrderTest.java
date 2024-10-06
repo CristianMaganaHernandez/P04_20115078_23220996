@@ -4,7 +4,7 @@
  */
 package com.mycompany.onlineshopping;
 
-import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.Map;
@@ -48,15 +48,20 @@ public class OrderTest {
     @Test
     public void testGetOrderTimestamp() {
         System.out.println("getOrderTimestamp");
+
         Customer customer = new Customer("Sarah Williams", "234 Oak Ave");
         Cart cart = new Cart();
         LocalDateTime dateTime = LocalDateTime.now();
         Order instance = new Order(customer, cart, dateTime);
 
-        long expectedMillis = Timestamp.valueOf(dateTime).getTime();
-        long actualMillis = instance.getOrderTimestamp().getTime();
+        // Format the expected timestamp the same way as in the getFormattedOrderTimestamp method
+        String expectedFormattedTimestamp = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        assertEquals(expectedMillis, actualMillis, 5, "Timestamps do not match in milliseconds.");
+        // Call the method that returns the formatted string
+        String actualFormattedTimestamp = instance.getFormattedOrderTimestamp();
+
+        // Compare the formatted string instead of comparing timestamps
+        assertEquals(expectedFormattedTimestamp, actualFormattedTimestamp, "Formatted timestamps do not match.");
     }
 
     @Test

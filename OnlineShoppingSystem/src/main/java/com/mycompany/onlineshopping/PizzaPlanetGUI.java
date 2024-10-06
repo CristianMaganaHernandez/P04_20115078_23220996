@@ -3,10 +3,7 @@ package com.mycompany.onlineshopping;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
 import java.util.Map;
-import java.sql.*;
 
 public class PizzaPlanetGUI extends JFrame {
 
@@ -24,25 +21,20 @@ public class PizzaPlanetGUI extends JFrame {
     private JTextField addressField;
 
     private DerbyDBConnector dbConnector;
-    private int customerId; // Store the customer ID from the database
-    private int cartId; // Store the cart ID after inserting into the Cart table
+    private int customerId;
+    private int cartId;
 
-    // Variables añadidas
+    // Variables added
     private JLabel cartIconLabel;
     private JLabel cartCounterLabel;
-    private int cartCounter = 0; // Inicializar el contador de productos del carrito
+    private int cartCounter = 0;
+
+    private OrderController orderController; // Add a reference to the OrderController
 
     public PizzaPlanetGUI() {
         dbConnector = DerbyDBConnector.getInstance(); // Get the singleton instance of the database connector
+        orderController = new OrderController(); // Initialize the OrderController
 
-        // Drop existing tables and recreate them at the start of the program
-//        try {
-//            dbConnector.dropTables();
-//            dbConnector.createTables();
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//            JOptionPane.showMessageDialog(this, "Error initializing database tables", "Database Error", JOptionPane.ERROR_MESSAGE);
-//        }
         // GUI setup
         setTitle("Pizza Planet Pizzeria");
         setSize(600, 400);
@@ -50,7 +42,7 @@ public class PizzaPlanetGUI extends JFrame {
         setLocationRelativeTo(null);
 
         cart = new Cart();
-        menu = new Menu(cart);
+        menu = new Menu(cart, false);
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -81,7 +73,7 @@ public class PizzaPlanetGUI extends JFrame {
         JButton startOrderButton = new JButton("Start Order");
         startOrderButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         startOrderButton.addActionListener(e -> {
-            clearCustomerFields(); // Clean Customer information
+            clearCustomerFields();
             cardLayout.show(mainPanel, "CustomerInformation");
         });
         panel.add(startOrderButton, gbc);
@@ -131,22 +123,18 @@ public class PizzaPlanetGUI extends JFrame {
             } else {
                 customer = new Customer(name, address); // Create a new Customer object
 
-                // Insert customer into the database and store the generated CustomerID
-                try {
-                    customerId = dbConnector.insertCustomer(name, address);
-                    if (customerId == -1) {
-                        JOptionPane.showMessageDialog(this, "Failed to insert customer.", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
+                // Use the OrderController to insert the customer into the database
+                customerId = orderController.createCustomer(name, address);
+                if (customerId == -1) {
+                    JOptionPane.showMessageDialog(this, "Failed to insert customer.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-                    // Insert a new cart into the Cart table for this customer
-                    cartId = dbConnector.insertCart(customerId);
-                    if (cartId == -1) {
-                        JOptionPane.showMessageDialog(this, "Failed to insert cart.", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
+                // Create a new cart using OrderController
+                cartId = orderController.createCart(customerId);
+                if (cartId == -1) {
+                    JOptionPane.showMessageDialog(this, "Failed to create cart.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
 
                 cardLayout.show(mainPanel, "Menu"); // Go to the Menu screen
@@ -183,25 +171,21 @@ public class PizzaPlanetGUI extends JFrame {
         menuLabel.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(menuLabel, BorderLayout.NORTH);
 
-        //Trolley panel with counter in upper right corner
         JPanel cartPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        //Upload cart image with reduced size
         ImageIcon cartIcon = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("CART.jpeg"))
                 .getImage().getScaledInstance(40, 30, Image.SCALE_SMOOTH));
-        cartIconLabel = new JLabel(cartIcon);  //Apply the scaling icon
+        cartIconLabel = new JLabel(cartIcon);
 
-        cartCounterLabel = new JLabel(String.valueOf(cartCounter)); //Initialise the counter to 0
+        cartCounterLabel = new JLabel(String.valueOf(cartCounter));
         cartCounterLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        cartCounterLabel.setForeground(Color.BLACK); //Colour of the counter in black
+        cartCounterLabel.setForeground(Color.BLACK);
 
-        //First add the image and then the counter so it is on the right side
         cartPanel.add(cartIconLabel);
         cartPanel.add(cartCounterLabel);
+        panel.add(cartPanel, BorderLayout.NORTH);
 
-        panel.add(cartPanel, BorderLayout.NORTH); //Add cart panel at top right
-
-        JPanel itemsPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // Two columns for products
+        JPanel itemsPanel = new JPanel(new GridLayout(0, 2, 10, 10));
         for (Product product : menu.getProducts()) {
             JPanel productPanel = new JPanel();
             productPanel.setBorder(BorderFactory.createTitledBorder(product.getDescription()));
@@ -210,8 +194,20 @@ public class PizzaPlanetGUI extends JFrame {
             JLabel productLabel = new JLabel();
             JButton addButton = new JButton("Add to Cart");
             addButton.addActionListener(e -> {
-                cart.addItem(product);
-                updateCartCounter(); //Update the counter when adding a product
+                int productId = orderController.getProductIdFromDatabase(product.getProductName());
+                if (productId != -1) {
+                    // Add item to the in-memory cart
+                    cart.addItem(product);
+                    
+                    // Add item to the database cart
+                    orderController.addItemToCart(cartId, productId, 1);
+                    
+                    // Update cart counter and total price
+                    updateCartCounter();
+                    updateTotalPrice();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Product not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             });
 
             productPanel.add(productLabel);
@@ -239,110 +235,63 @@ public class PizzaPlanetGUI extends JFrame {
         return panel;
     }
 
-    //Method to update cart counter
     private void updateCartCounter() {
-        cartCounter++; //Increment the cart counter
-        cartCounterLabel.setText(String.valueOf(cartCounter));//Update the counter's JLabel
+        cartCounter++;
+        cartCounterLabel.setText(String.valueOf(cartCounter));
+    }
+
+    private void updateTotalPrice() {
+        double totalPrice = orderController.calculateTotalOrderCost(cart);  // Fetch total price from OrderController
+        totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));  // Update the GUI label with the total price
     }
 
     private JPanel createCartPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Cart label
         JLabel cartLabel = new JLabel("Your Cart", JLabel.CENTER);
         cartLabel.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(cartLabel, BorderLayout.NORTH);
 
-        // Cart items panel with BoxLayout for vertical stacking
         cartItemsPanel = new JPanel();
-        cartItemsPanel.setLayout(new BoxLayout(cartItemsPanel, BoxLayout.Y_AXIS)); // Vertical stacking
+        cartItemsPanel.setLayout(new BoxLayout(cartItemsPanel, BoxLayout.Y_AXIS));
         cartItemsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Add cartItemsPanel to a scroll pane with a fixed height
         JScrollPane scrollPane = new JScrollPane(cartItemsPanel);
-        scrollPane.setPreferredSize(new Dimension(600, 180)); // Adjust the height to reduce the total space
+        scrollPane.setPreferredSize(new Dimension(600, 180));
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        // Total label
         totalLabel = new JLabel("Total: $0.00", JLabel.CENTER);
         totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
         panel.add(totalLabel, BorderLayout.SOUTH);
 
-        // Bottom panel with checkout and back buttons
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         JButton checkoutButton = new JButton("Checkout");
         checkoutButton.setFont(new Font("Arial", Font.PLAIN, 16));
-        checkoutButton.setPreferredSize(new Dimension(150, 30));  //Preferred size
-        checkoutButton.setMinimumSize(new Dimension(130, 30));   //Minimum size Need to be tested in other size of monitor
         checkoutButton.addActionListener(e -> {
-            try {
-                // Insert the order into the Orders table and get the generated OrderID
-                int orderId = dbConnector.insertOrder(customerId, cart.getTotalPrice());
-                System.out.println("Order ID: " + orderId); // Add debug print
-
-                // Insert each cart item into the CartItem table and the OrderItem table
-                Map<String, Integer> frequencyMap = cart.getItemFrequency();
-                for (Map.Entry<String, Integer> entry : frequencyMap.entrySet()) {
-                    String productName = entry.getKey();
-                    int quantity = entry.getValue();
-                    double itemPrice = cart.getItemPrice(productName);
-
-                    // Retrieve the ProductID from the database
-                    int productId = getProductIdFromDatabase(productName);
-                    System.out.println("Product ID: " + productId); // Add debug print
-
-                    // If the productId is valid, insert it into the CartItem and OrderItem tables
-                    if (productId != -1) {
-                        dbConnector.insertCartItem(cartId, productId, quantity);  // Insert into CartItem
-
-                        // Insert into the OrderItem table (OrderID, ProductID, Quantity)
-                        dbConnector.insertOrderItem(orderId, productId, quantity);  // Insert into OrderItem
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Product not found: " + productName, "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-
-                // Proceed to the order confirmation page
-                Order order = new Order(customer, cart, orderDateTime);
-                order.saveOrder("orders.txt"); // Save the order to file as well
-                cardLayout.show(mainPanel, "OrderConfirmation");
-                displayOrderConfirmation(order);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+            orderDateTime = LocalDateTime.now();
+            Order order = new Order(customer, cart, orderDateTime);
+            orderController.createOrder(customer, cart); // Process the order using OrderController
+            
+            // Save the order using the saveOrderToFile method from OrderController
+            orderController.saveOrderToFile(order, "orders.txt");
+            
+            updateTotalPrice(); // Refresh total price before displaying confirmation
+            cardLayout.show(mainPanel, "OrderConfirmation");
+            displayOrderConfirmation(order);
         });
 
         bottomPanel.add(checkoutButton);
 
         JButton backButton = new JButton("Back to Menu");
         backButton.setFont(new Font("Arial", Font.PLAIN, 16));
-        backButton.setPreferredSize(new Dimension(150, 30));  //Preferred size
-        backButton.setMinimumSize(new Dimension(130, 30));  //Minimum size Need to be tested in other size of monitor
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
         bottomPanel.add(backButton);
 
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
-    }
-
-    private int getProductIdFromDatabase(String productName) throws SQLException {
-        String query = "SELECT ProductID FROM Product WHERE TRIM(LOWER(Name)) = TRIM(LOWER(?))";
-        try ( PreparedStatement pstmt = dbConnector.getConnection().prepareStatement(query)) {
-            pstmt.setString(1, productName.trim().toLowerCase()); // Normalize case and trim
-            System.out.println("Querying for product: " + productName); // Add debug print
-
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                System.out.println("Product found: " + productName + " with ID " + rs.getInt("ProductID")); // Add debug print
-                return rs.getInt("ProductID");
-            } else {
-                System.out.println("Product not found: " + productName); // Add debug print
-            }
-        }
-        return -1; // Return -1 if the product is not found
     }
 
     private void updateCartPanel() {
@@ -360,56 +309,43 @@ public class PizzaPlanetGUI extends JFrame {
             cartItemsPanel.add(cartItemPanel);
         }
 
-        totalLabel.setText("Total Price: $" + cart.getTotalPrice());
+        // Update total price
+        updateTotalPrice();
 
         cartItemsPanel.revalidate();
         cartItemsPanel.repaint();
     }
 
     private JPanel createCartItemPanel(String itemName, int quantity, double itemPrice) {
-        // Create a panel for each cart item
         JPanel cartItemPanel = new JPanel(new BorderLayout());
         cartItemPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
 
-        // Set a thinner height for the cart item panel
-        cartItemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // Reduce the height to make it thinner
+        cartItemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         cartItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Create label to display item details
         JLabel productLabel = new JLabel(itemName + " - " + quantity + " pcs - $" + (itemPrice * quantity) + " ( $" + itemPrice + " each )");
         productLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         cartItemPanel.add(productLabel, BorderLayout.CENTER);
 
-        // Create a panel to hold the buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        // Create remove button for each item
         JButton removeButton = new JButton("Remove");
-        removeButton.setFont(new Font("Arial", Font.PLAIN, 12)); // Slightly reduce the button font size
-        removeButton.setPreferredSize(new Dimension(80, 30)); // Keep the button size consistent
-
-        // Action listener for removing all items of a specific type
         removeButton.addActionListener(e -> {
-            cart.removeItem(itemName); // Remove the item from the cart
-            updateCartPanel(); // Refresh the cart display
+            cart.removeItem(itemName);
+            updateCartPanel();
+            updateTotalPrice();
         });
 
-        // Create delete button for removing one item at a time
         JButton deleteButton = new JButton("Delete");
-        deleteButton.setFont(new Font("Arial", Font.PLAIN, 12)); // Slightly reduce the button font size
-        deleteButton.setPreferredSize(new Dimension(80, 30)); // Keep the button size consistent
-
-        // Action listener for deleting one item at a time
         deleteButton.addActionListener(e -> {
-            cart.deleteItem(itemName); // Decrease item quantity by 1
-            updateCartPanel(); // Refresh the cart display
+            cart.deleteItem(itemName);
+            updateCartPanel();
+            updateTotalPrice();
         });
 
-        // Add both buttons to the button panel
         buttonPanel.add(deleteButton);
         buttonPanel.add(removeButton);
 
-        // Add the button panel to the cart item panel
         cartItemPanel.add(buttonPanel, BorderLayout.EAST);
 
         return cartItemPanel;
@@ -445,25 +381,12 @@ public class PizzaPlanetGUI extends JFrame {
 
     private void displayOrderConfirmation(Order order) {
         JTextArea orderDetailsTextArea = new JTextArea();
-        orderDetailsTextArea.setText(getOrderDetails(order));
+        orderDetailsTextArea.setText(orderController.getOrderDetails(order)); // Fetch details from controller
         orderDetailsTextArea.setEditable(false);
+
+        totalLabel.setText("Total Order Cost: $" + String.format("%.2f", order.getCart().getTotalPrice()));
+
         JOptionPane.showMessageDialog(this, new JScrollPane(orderDetailsTextArea), "Order Confirmation", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private String getOrderDetails(Order order) {
-        StringBuilder details = new StringBuilder();
-        details.append("Customer Name: ").append(order.getCustomer().getName()).append("\n");
-        details.append("Customer Address: ").append(order.getCustomer().getAddress()).append("\n");
-        details.append("Order Items:\n");
-
-        Map<String, Integer> frequencyMap = order.getCart().getItemFrequency();
-        for (Map.Entry<String, Integer> entry : frequencyMap.entrySet()) {
-            details.append(entry.getKey()).append(" - ").append(entry.getValue()).append(" pcs\n");
-        }
-
-        details.append("\nTotal Order Cost: $").append(String.format("%.2f", order.getCart().getTotalPrice())).append("\n");
-        details.append(order.getOrderTimestamp());
-        return details.toString();
     }
 
     public static void main(String[] args) {
@@ -471,11 +394,10 @@ public class PizzaPlanetGUI extends JFrame {
             new PizzaPlanetGUI().setVisible(true);
         });
 
-        // Register a shutdown hook to close the database connection and shutdown Derby when the program exits
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
-            dbConnector.closeConnection();  // Close the database connection
-            dbConnector.shutdownDatabase(); // Shutdown the database
+            dbConnector.closeConnection();
+            dbConnector.shutdownDatabase();
         }));
     }
 }

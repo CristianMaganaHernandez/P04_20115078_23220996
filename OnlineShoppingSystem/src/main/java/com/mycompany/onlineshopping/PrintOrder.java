@@ -29,6 +29,6 @@ class PrintOrder {
         }
 
         System.out.println(String.format("Total Order Cost: $%.2f", order.getCart().getTotalPrice()));
-        System.out.println(order.getOrderTimestamp().toString());
+        System.out.println(order.getFormattedOrderTimestamp());
     }
 }

@@ -253,17 +253,35 @@ public class DerbyDBConnector {
         return -1; // Return -1 if no CartID was generated
     }
 
+    // Method to get product price from the database using the ProductID
+    public double getProductPrice(int productId) throws SQLException {
+        double price = -1;
+        String query = "SELECT Price FROM Product WHERE ProductID = ?";
+        try ( PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, productId);  // Set the productId parameter
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                price = rs.getDouble("Price");  // Retrieve the product price
+            }
+        }
+        return price;
+    }
+
     public void insertCartItem(int cartId, int productId, int quantity) throws SQLException {
+        if (cartId <= 0) {
+            throw new SQLException("Invalid Cart ID: " + cartId);
+        }
+
         String insertSQL = "INSERT INTO CartItem (CARTID, PRODUCTID, QUANTITY) VALUES (?, ?, ?)";
         try ( PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
-            pstmt.setInt(1, cartId);  // Use CARTID instead of OrderID
-            pstmt.setInt(2, productId); // Use PRODUCTID
-            pstmt.setInt(3, quantity);  // Use QUANTITY
+            pstmt.setInt(1, cartId);  // Ensure the cartId is valid
+            pstmt.setInt(2, productId);
+            pstmt.setInt(3, quantity);
             pstmt.executeUpdate();
-            //connection.commit();  // Commit after successful insert
         } catch (SQLException e) {
-            //connection.rollback();  // Rollback on failure
+            e.printStackTrace();
             throw e;
         }
     }
+
 }

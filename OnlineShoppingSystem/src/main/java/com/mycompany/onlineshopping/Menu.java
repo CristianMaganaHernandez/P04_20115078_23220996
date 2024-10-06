@@ -1,14 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.onlineshopping;
 
-/**
- *
- * @author Cristian Alejandro Magana Hernandez
- * @author Santiago Viscarra
- */
 import java.util.Scanner;
 import java.sql.*;
 import java.util.Map;
@@ -19,9 +10,11 @@ class Menu {
     private final Cart cart;
     private final Scanner scanner;
     private Product[] products;
+    private boolean isCUI;
 
-    public Menu(Cart cart) {
+    public Menu(Cart cart, boolean isCUI) {
         this.cart = cart;
+        this.isCUI = isCUI;  // Set whether we're in CUI mode
         this.scanner = new Scanner(System.in);
         initializeProducts();
     }
@@ -37,28 +30,33 @@ class Menu {
             new Item("Moon Cheesecake", 4.99)
         };
 
-        // Insert products into the database only if they do not already exist
-        try {
-            DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
-            for (Product product : products) {
-                if (!productExists(dbConnector, product.getProductName())) {
-                    dbConnector.insertProduct(product.getProductName(), product.getProductPrice());
-                    System.out.println("Inserted product: " + product.getProductName());
-                } else {
-                    System.out.println("Product already exists: " + product.getProductName());
+        // Only interact with the database if not in CUI mode
+        if (!isCUI) {
+            try {
+                DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+                for (Product product : products) {
+                    if (!productExists(dbConnector, product.getProductName())) {
+                        dbConnector.insertProduct(product.getProductName(), product.getProductPrice());
+                        System.out.println("Inserted product: " + product.getProductName());
+                    } else {
+                        System.out.println("Product already exists: " + product.getProductName());
+                    }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
-// Check if a product already exists in the database
     private boolean productExists(DerbyDBConnector dbConnector, String productName) throws SQLException {
+        if (isCUI) {
+            return false;  // In CUI mode, don't check the database
+        }
+        
         String query = "SELECT COUNT(*) FROM Product WHERE Name = ?";
-        try ( PreparedStatement pstmt = dbConnector.getConnection().prepareStatement(query)) {
+        try (PreparedStatement pstmt = dbConnector.getConnection().prepareStatement(query)) {
             pstmt.setString(1, productName);
-            try ( ResultSet rs = pstmt.executeQuery()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;  // Returns true if the product exists
                 }
@@ -99,8 +97,10 @@ class Menu {
                     cart.addItem(selectedProduct);
                     System.out.println("Item added to cart.");
 
-                    addProductToCartTable(selectedProduct);
-
+                    // Only add the product to the CartItem table if not in CUI mode
+                    if (!isCUI) {
+                        addProductToCartTable(selectedProduct);
+                    }
                 } else {
                     System.out.println("Invalid choice. Please try again.");
                 }
@@ -110,16 +110,15 @@ class Menu {
         }
     }
 
-    // Add product to the CartItem table in the database
     private void addProductToCartTable(Product product) {
         try {
-            DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
-            // Add product to CartItem table in the database
-            // Assuming you have a method to insert into CartItem table
-            int orderId = 1; // Assuming an order exists or creating one before this
-            int quantity = 1; // Assuming default quantity is 1
-            dbConnector.insertCartItem(orderId, product.getProductID(), quantity); // Insert product into CartItem
-            System.out.println("Product added to CartItem table: " + product.getDescription());
+            if (!isCUI) {
+                DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+                int orderId = 1; // Assuming an order exists or creating one before this
+                int quantity = 1; // Assuming default quantity is 1
+                dbConnector.insertCartItem(orderId, product.getProductID(), quantity);
+                System.out.println("Product added to CartItem table: " + product.getDescription());
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -128,32 +127,32 @@ class Menu {
     private void checkout() {
         System.out.println("Proceeding to checkout...");
 
-        try {
-            DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
+        if (!isCUI) {
+            try {
+                DerbyDBConnector dbConnector = DerbyDBConnector.getInstance();
 
-            // Assuming customerId is available (you can modify this as needed)
-            int customerId = 1;
-            double totalPrice = cart.getTotalPrice();
+                int customerId = 1;
+                double totalPrice = cart.getTotalPrice();
 
-            // Insert a new order into the Orders table
-            int orderId = dbConnector.insertOrder(customerId, totalPrice);
-            if (orderId != -1) {
-                System.out.println("Order created successfully with Order ID: " + orderId);
+                int orderId = dbConnector.insertOrder(customerId, totalPrice);
+                if (orderId != -1) {
+                    System.out.println("Order created successfully with Order ID: " + orderId);
 
-                // Now add each item from the cart into the CartItem table
-                for (Map.Entry<Product, Integer> entry : cart.getItemsWithQuantities().entrySet()) {
-                    Product product = entry.getKey();
-                    int quantity = entry.getValue();
-
-                    // Make sure ProductID is used to insert into CartItem
-                    dbConnector.insertCartItem(orderId, product.getProductID(), quantity);
+                    for (Map.Entry<Product, Integer> entry : cart.getItemsWithQuantities().entrySet()) {
+                        Product product = entry.getKey();
+                        int quantity = entry.getValue();
+                        dbConnector.insertCartItem(orderId, product.getProductID(), quantity);
+                    }
+                    System.out.println("Items added to CartItem table for order: " + orderId);
+                } else {
+                    System.out.println("Failed to create order.");
                 }
-                System.out.println("Items added to CartItem table for order: " + orderId);
-            } else {
-                System.out.println("Failed to create order.");
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            // Handle checkout in CUI mode without interacting with the database
+            System.out.println("CUI Mode: Proceeding to checkout without using the database.");
         }
     }
 }

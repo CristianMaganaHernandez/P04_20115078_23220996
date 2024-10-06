@@ -13,6 +13,9 @@ import java.util.*;
 import java.time.LocalDateTime;
 
 class PizzaPlanetMain {
+    
+    // Flag to determine if the system is running in CUI mode
+    private static boolean isCUI = true; // Set this flag to true for CUI mode
 
     // This is the main class for running the Pizza PLanet Online shopping system
     public static void main(String[] args) {
@@ -30,7 +33,7 @@ class PizzaPlanetMain {
 
             // Create Cart and Menu
             Cart cart = new Cart();
-            Menu menu = new Menu(cart);
+            Menu menu = new Menu(cart,isCUI);
 
             // Handle Menu User Input
             menu.handleUserInput();
