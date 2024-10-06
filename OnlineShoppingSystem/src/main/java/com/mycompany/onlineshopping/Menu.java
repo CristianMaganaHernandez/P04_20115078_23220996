@@ -21,14 +21,17 @@ class Menu {
 
     private void initializeProducts() {
         products = new Product[]{
-            new Item("Margherita Pizza", 8.99),
-            new Item("Pepperoni Pizza", 9.99),
-            new Item("Space Special Pizza", 12.99),
-            new Item("Gluten-Free Pizza", 10.99),
-            new Item("Vegan Pizza", 11.99),
-            new Item("Meteor Fries", 3.99),
-            new Item("Moon Cheesecake", 4.99)
+            ProductFactory.createProduct("pizza", "Margherita Pizza", 8.99),
+            ProductFactory.createProduct("pizza", "Pepperoni Pizza", 9.99),
+            ProductFactory.createProduct("pizza", "Space Special Pizza", 12.99),
+            ProductFactory.createProduct("pizza", "Gluten-Free Pizza", 10.99),
+            ProductFactory.createProduct("pizza", "Vegan Pizza", 11.99),
+            ProductFactory.createProduct("drink", "Cola", 1.99),
+            ProductFactory.createProduct("drink", "Lemonade", 2.49),
+            ProductFactory.createProduct("dessert", "Meteor Fries", 3.99),
+            ProductFactory.createProduct("dessert", "Moon Cheesecake", 4.99)
         };
+
 
         // Only interact with the database if not in CUI mode
         if (!isCUI) {
