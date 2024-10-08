@@ -5,6 +5,8 @@ import java.awt.*;
 
 public class OrderConfirmationPanel extends JPanel {
 
+    private JTextArea orderDetailsTextArea;
+
     public OrderConfirmationPanel(PizzaPlanetGUI gui) {
         // Set layout and border for the panel
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -16,10 +18,21 @@ public class OrderConfirmationPanel extends JPanel {
         confirmationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(confirmationLabel);
 
-        // Text area to display order details
-        JTextArea orderDetailsTextArea = new JTextArea();
+        // Text area to display order details or to insert the image
+        orderDetailsTextArea = new JTextArea();
         orderDetailsTextArea.setEditable(false);  // Non-editable for order details
-        add(new JScrollPane(orderDetailsTextArea));  // Scroll pane for the text area
+
+        // Load the image and insert it into the text area
+        ImageIcon thankYouImage = new ImageIcon(getClass().getResource("/THANKU.jpg"));
+        Image scaledImage = thankYouImage.getImage().getScaledInstance(500, 200, Image.SCALE_SMOOTH);  // Adjust the size as needed
+        JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+
+        // Set the image label into the text area by adding it to a scroll pane
+        JScrollPane imageScrollPane = new JScrollPane(imageLabel);
+        imageScrollPane.setPreferredSize(new Dimension(400, 200));  // Set the preferred size of the image panel
+
+        // Add the scroll pane containing the image to the panel
+        add(imageScrollPane);
 
         // Space between the text area and buttons
         add(Box.createVerticalStrut(20));
