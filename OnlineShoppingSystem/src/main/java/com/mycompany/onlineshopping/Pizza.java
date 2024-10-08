@@ -9,10 +9,10 @@ package com.mycompany.onlineshopping;
  * @author Cristian Alejandro Magana Hernandez
  * @author Santiago Viscarra
  */
-class Item extends Product {
+class Pizza extends Product {
 
     // This class extends the Product class, representing a specific intem in the store
-    public Item(String name, double price) {
+    public Pizza(String name, double price) {
         // Constructor for initializing an item with its name and price.
         super(name, price);
     }

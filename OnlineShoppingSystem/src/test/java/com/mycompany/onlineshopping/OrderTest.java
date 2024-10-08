@@ -83,7 +83,7 @@ public class OrderTest {
 
         Customer customer = new Customer("Emma Thompson", "101 Elm St");
         Cart cart = new Cart();
-        cart.addItem(new Item("Pepperoni Pizza", 9.99));
+        cart.addItem(new Pizza("Pepperoni Pizza", 9.99));
 
         LocalDateTime orderTime = LocalDateTime.now();
         Order order = new Order(customer, cart, orderTime);
@@ -98,7 +98,7 @@ public class OrderTest {
         Cart cart = new Cart();
         Order instance = new Order(customer, cart, LocalDateTime.now());
 
-        cart.addItem(new Item("Margherita Pizza", 8.99));
+        cart.addItem(new Pizza("Margherita Pizza", 8.99));
 
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("Margherita Pizza", 2);
         String result = instance.itemDetails(entry);

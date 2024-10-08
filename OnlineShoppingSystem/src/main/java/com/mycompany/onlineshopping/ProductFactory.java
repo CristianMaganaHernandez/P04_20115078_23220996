@@ -14,7 +14,7 @@ public class ProductFactory {
     public static Product createProduct(String type, String name, double price) {
         switch (type.toLowerCase()) {
             case "pizza":
-                return new Item(name, price);  // Use Item as a general Pizza product
+                return new Pizza(name, price);  // Use Pizza as a general Pizza product
             case "drink":
                 return new Drink(name, price);  // Create a Drink product
             case "dessert":

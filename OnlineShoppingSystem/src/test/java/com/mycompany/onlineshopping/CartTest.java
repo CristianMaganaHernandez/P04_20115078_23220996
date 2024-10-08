@@ -30,7 +30,7 @@ public class CartTest {
     @Test
     public void testAddItem() {
         System.out.println("addItem");
-        Product item = new Item("Pepperoni Pizza", 9.99);
+        Product item = new Pizza("Pepperoni Pizza", 9.99);
         Cart instance = new Cart();
         instance.addItem(item);
         assertEquals(1, instance.getItemQuantity(item));
@@ -39,7 +39,7 @@ public class CartTest {
     @Test
     public void testRemoveItem() {
         System.out.println("removeItem");
-        Product item = new Item("Space Special Pizza", 12.99);
+        Product item = new Pizza("Space Special Pizza", 12.99);
         Cart instance = new Cart();
         instance.addItem(item);
         instance.removeItem("Space Special Pizza");
@@ -49,7 +49,7 @@ public class CartTest {
     @Test
     public void testDeleteItem() {
         System.out.println("deleteItem");
-        Product item = new Item("Vegan Pizza", 11.99);
+        Product item = new Pizza("Vegan Pizza", 11.99);
         Cart instance = new Cart();
         instance.addItem(item);
         instance.addItem(item);
@@ -61,8 +61,8 @@ public class CartTest {
     public void testGetItemsWithQuantities() {
         System.out.println("getItemsWithQuantities");
         Cart instance = new Cart();
-        Product item1 = new Item("Pepperoni Pizza", 9.99);
-        Product item2 = new Item("Meteor Fries", 3.99);
+        Product item1 = new Pizza("Pepperoni Pizza", 9.99);
+        Product item2 = new Pizza("Meteor Fries", 3.99);
         instance.addItem(item1);
         instance.addItem(item2);
         Map<Product, Integer> result = instance.getItemsWithQuantities();
@@ -73,8 +73,8 @@ public class CartTest {
     public void testGetTotalPrice() {
         System.out.println("getTotalPrice");
         Cart instance = new Cart();
-        Product pizza = new Item("Pepperoni Pizza", 9.99);
-        Product fries = new Item("Meteor Fries", 3.99);
+        Product pizza = new Pizza("Pepperoni Pizza", 9.99);
+        Product fries = new Pizza("Meteor Fries", 3.99);
         instance.addItem(pizza);
         instance.addItem(fries);
         double expResult = 9.99 + 3.99;
@@ -86,7 +86,7 @@ public class CartTest {
     public void testGetItemFrequency() {
         System.out.println("getItemFrequency");
         Cart instance = new Cart();
-        Product pizza = new Item("Pepperoni Pizza", 9.99);
+        Product pizza = new Pizza("Pepperoni Pizza", 9.99);
         instance.addItem(pizza);
         instance.addItem(pizza);
         Map<String, Integer> result = instance.getItemFrequency();
@@ -96,7 +96,7 @@ public class CartTest {
     @Test
     public void testGetItemQuantity() {
         System.out.println("getItemQuantity");
-        Product fries = new Item("Meteor Fries", 3.99);
+        Product fries = new Pizza("Meteor Fries", 3.99);
         Cart instance = new Cart();
         instance.addItem(fries);
         instance.addItem(fries);
@@ -107,7 +107,7 @@ public class CartTest {
     @Test
     public void testGetItemPrice() {
         System.out.println("getItemPrice");
-        Product mc = new Item("Moon Cheesecake", 4.99);
+        Product mc = new Pizza("Moon Cheesecake", 4.99);
         Cart instance = new Cart();
         instance.addItem(mc);
         double result = instance.getItemPrice("Moon Cheesecake");
