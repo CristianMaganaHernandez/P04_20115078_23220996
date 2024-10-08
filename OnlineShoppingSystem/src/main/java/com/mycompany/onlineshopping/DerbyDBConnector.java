@@ -13,7 +13,6 @@ public class DerbyDBConnector {
         try {
             connection = DriverManager.getConnection(jdbcURL);
             System.out.println("Database connected.");
-            //connection.setAutoCommit(false); // Enable manual commit
 
             // Automatically create tables if they don't exist
             createTables(); // Automatically create tables on database startup
@@ -166,7 +165,6 @@ public class DerbyDBConnector {
 
             try ( ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    //connection.commit();
                     return generatedKeys.getInt(1); // Return the CustomerID
                 }
             } catch (SQLException e) {
@@ -187,11 +185,9 @@ public class DerbyDBConnector {
 
             try ( ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    //connection.commit();
                     return generatedKeys.getInt(1); // Return the OrderID
                 }
             } catch (SQLException e) {
-                //connection.rollback();  // Rollback on failure
                 throw e;
             }
         }
@@ -205,9 +201,7 @@ public class DerbyDBConnector {
             pstmt.setInt(2, productId); // The ProductID of the product being ordered
             pstmt.setInt(3, quantity);  // The quantity of the product
             pstmt.executeUpdate();
-            //connection.commit();  // Commit after successful insert
         } catch (SQLException e) {
-            //connection.rollback();  // Rollback on failure
             throw e;
         }
     }
@@ -222,11 +216,9 @@ public class DerbyDBConnector {
             // Retrieve the generated ProductID
             try ( ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    //connection.commit();
                     return generatedKeys.getInt(1); // Return the ProductID
                 }
             } catch (SQLException e) {
-                //connection.rollback();  // Rollback on failure
                 throw e;
             }
         }
@@ -242,11 +234,9 @@ public class DerbyDBConnector {
             // Retrieve the generated CartID
             try ( ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    //connection.commit();
                     return generatedKeys.getInt(1); // Return the CartID
                 }
             } catch (SQLException e) {
-                //connection.rollback();  // Rollback on failure
                 throw e;
             }
         }
