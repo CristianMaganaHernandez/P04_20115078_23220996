@@ -51,7 +51,7 @@ public class MenuPanel extends JPanel {
                     // Add item to the database cart
                     gui.orderController.addItemToCart(gui.cartId, productId, 1);
                     // Update cart counter and total price
-                    gui.updateCartCounter();
+                    gui.updateCartCounter(true);  // Update the counter for adding an item
                     gui.updateTotalPrice();
                 } else {
                     JOptionPane.showMessageDialog(gui, "Product not found.", "Error", JOptionPane.ERROR_MESSAGE);
