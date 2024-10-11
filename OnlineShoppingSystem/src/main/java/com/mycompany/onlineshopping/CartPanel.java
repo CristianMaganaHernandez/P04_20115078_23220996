@@ -115,7 +115,7 @@ public class CartPanel extends JPanel {
         JButton removeButton = new JButton("Remove");
         removeButton.addActionListener(e -> {
             gui.cart.removeItem(itemName);
-            gui.updateCartCounter(false); // Decrement the counter for removing an item
+            gui.updateCartCounter(false, 1); // Decrement the counter by 1
             updateCartPanel();
             gui.updateTotalPrice();
         });
@@ -124,7 +124,7 @@ public class CartPanel extends JPanel {
         JButton deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> {
             gui.cart.deleteItem(itemName);
-            gui.updateCartCounter(false); // Decrement the counter for deleting items (you may need to decrease based on quantity)
+            gui.updateCartCounter(false, quantity); // Decrement the counter by the total quantity of the item
             updateCartPanel();
             gui.updateTotalPrice();
         });

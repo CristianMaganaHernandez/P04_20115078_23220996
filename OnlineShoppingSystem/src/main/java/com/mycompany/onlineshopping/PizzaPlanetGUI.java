@@ -69,15 +69,17 @@ public class PizzaPlanetGUI extends JFrame {
     }
 
     // Method to update the cart counter
-// Method to update the cart counter
-public void updateCartCounter(boolean isAdding) {
-    if (isAdding) {
-        cartCounter++;
-    } else {
-        cartCounter = Math.max(0, cartCounter - 1); // Ensure the counter doesn't go below zero
+    public void updateCartCounter(boolean isAdding, int quantity) {
+        if (isAdding) {
+            cartCounter += quantity;
+        } else {
+            cartCounter = Math.max(0, cartCounter - quantity); // Decrement the counter based on quantity
+        }
+        if (cartCounter == 0) {
+            cartCounter = 0; // Ensure it resets to 0 when there are no items
+        }
+        cartCounterLabel.setText(String.valueOf(cartCounter));
     }
-    cartCounterLabel.setText(String.valueOf(cartCounter));
-}
 
     // Method to update the total price
     public void updateTotalPrice() {

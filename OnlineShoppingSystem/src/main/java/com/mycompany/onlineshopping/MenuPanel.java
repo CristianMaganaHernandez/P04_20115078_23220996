@@ -39,7 +39,7 @@ public class MenuPanel extends JPanel {
             productPanel.setBorder(BorderFactory.createTitledBorder(product.getDescription()));
             productPanel.setLayout(new BoxLayout(productPanel, BoxLayout.Y_AXIS));
 
-            //JLabel productLabel = new JLabel(product.getProductName());
+            // Add button to add product to the cart
             JButton addButton = new JButton("Add to Cart");
 
             // Add action to the 'Add to Cart' button
@@ -51,7 +51,7 @@ public class MenuPanel extends JPanel {
                     // Add item to the database cart
                     gui.orderController.addItemToCart(gui.cartId, productId, 1);
                     // Update cart counter and total price
-                    gui.updateCartCounter(true);  // Update the counter for adding an item
+                    gui.updateCartCounter(true, 1);  // Increment the counter by 1 for the added item
                     gui.updateTotalPrice();
                 } else {
                     JOptionPane.showMessageDialog(gui, "Product not found.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -59,7 +59,6 @@ public class MenuPanel extends JPanel {
             });
 
             // Add components to the product panel
-            //productPanel.add(productLabel);
             productPanel.add(Box.createVerticalStrut(5));
             productPanel.add(addButton);
 
