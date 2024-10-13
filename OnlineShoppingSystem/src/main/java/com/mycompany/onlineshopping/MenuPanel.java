@@ -1,11 +1,21 @@
 package com.mycompany.onlineshopping;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class MenuPanel extends JPanel {
+    private Image backgroundImage;
 
     public MenuPanel(PizzaPlanetGUI gui) {
+        // Load the background image
+        try {
+            backgroundImage = ImageIO.read(getClass().getClassLoader().getResource("Menu_Background.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // Set layout and border for the panel
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -86,5 +96,16 @@ public class MenuPanel extends JPanel {
 
         // Add bottom panel to the MenuPanel
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Draw the background image, scaling it to the size of the panel
+        if (backgroundImage != null) {
+            int width = getWidth();
+            int height = getHeight();
+            g.drawImage(backgroundImage, 0, 0, width, height, this);
+        }
     }
 }
