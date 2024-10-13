@@ -9,7 +9,7 @@ public class OrderConfirmationPanel extends JPanel {
 
     public OrderConfirmationPanel(PizzaPlanetGUI gui) {
         // Load the thank you image
-        thankYouImage = new ImageIcon(getClass().getClassLoader().getResource("THANKU.jpg")).getImage();
+        thankYouImage = new ImageIcon(getClass().getClassLoader().getResource("Thank_you.jpg")).getImage();
 
         // Set layout to GridBagLayout for better control over component placement
         setLayout(new GridBagLayout());
@@ -21,10 +21,10 @@ public class OrderConfirmationPanel extends JPanel {
         gbc.fill = GridBagConstraints.NONE;     // Don't stretch the components
 
         // Order confirmation label
-        JLabel confirmationLabel = new JLabel("Thank you for your order!", JLabel.CENTER);
-        confirmationLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        confirmationLabel.setForeground(Color.WHITE); // Set text color to stand out against the image
-        add(confirmationLabel, gbc);
+        //JLabel confirmationLabel = new JLabel("Thank you for your order!", JLabel.CENTER);
+        //confirmationLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        //confirmationLabel.setForeground(Color.BLACK); // Set text color to stand out against the image
+        //add(confirmationLabel, gbc);
 
         // Move to the next row for the button
         gbc.gridy++;

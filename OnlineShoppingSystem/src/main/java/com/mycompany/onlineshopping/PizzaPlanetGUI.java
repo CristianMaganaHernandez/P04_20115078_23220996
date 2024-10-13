@@ -3,7 +3,6 @@ package com.mycompany.onlineshopping;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 public class PizzaPlanetGUI extends JFrame {
 
