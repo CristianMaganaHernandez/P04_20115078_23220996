@@ -8,26 +8,25 @@ package com.mycompany.onlineshopping;
  *
  * @author crist
  */
-
-
-
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class IntroductionPanel extends JPanel {
+    private Image backgroundImage;
+
     public IntroductionPanel(PizzaPlanetGUI gui) {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.insets = new Insets(10, 10, 10, 10);
+        // Load the welcome image
+        try {
+            backgroundImage = ImageIO.read(getClass().getClassLoader().getResource("TSwift_welcome.jpg")); // Replace with your actual image file
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        JLabel welcomeLabel = new JLabel("Welcome to Pizza Planet Pizzeria!", JLabel.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(welcomeLabel, gbc);
+        setLayout(new BorderLayout());
 
-        gbc.gridy++;
+        // Add the Start Order button at the bottom
         JButton startOrderButton = new JButton("Start Order");
         startOrderButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         startOrderButton.addActionListener(e -> {
@@ -35,6 +34,19 @@ public class IntroductionPanel extends JPanel {
             gui.addressField.setText("");
             gui.cardLayout.show(gui.mainPanel, "CustomerInformation");
         });
-        add(startOrderButton, gbc);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(startOrderButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Draw the background image, scaling it to the size of the panel
+        if (backgroundImage != null) {
+            int width = getWidth();
+            int height = getHeight();
+            g.drawImage(backgroundImage, 0, 0, width, height, this);
+        }
     }
 }

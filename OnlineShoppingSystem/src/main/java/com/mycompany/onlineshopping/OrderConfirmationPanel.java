@@ -5,39 +5,30 @@ import java.awt.*;
 
 public class OrderConfirmationPanel extends JPanel {
 
-    private JTextArea orderDetailsTextArea;
+    private Image thankYouImage;
 
     public OrderConfirmationPanel(PizzaPlanetGUI gui) {
-        // Set layout and border for the panel
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Load the thank you image
+        thankYouImage = new ImageIcon(getClass().getClassLoader().getResource("Thank_you.jpg")).getImage();
+
+        // Set layout to GridBagLayout for better control over component placement
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(20, 20, 20, 20); // Padding around components
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER; // Center the components horizontally and vertically
+        gbc.fill = GridBagConstraints.NONE;     // Don't stretch the components
 
         // Order confirmation label
-        JLabel confirmationLabel = new JLabel("Thank you for your order!", JLabel.CENTER);
-        confirmationLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        confirmationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(confirmationLabel);
+        //JLabel confirmationLabel = new JLabel("Thank you for your order!", JLabel.CENTER);
+        //confirmationLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        //confirmationLabel.setForeground(Color.BLACK); // Set text color to stand out against the image
+        //add(confirmationLabel, gbc);
 
-        // Text area to display order details or to insert the image
-        orderDetailsTextArea = new JTextArea();
-        orderDetailsTextArea.setEditable(false);  // Non-editable for order details
-
-        // Load the image and insert it into the text area
-        ImageIcon thankYouImage = new ImageIcon(getClass().getResource("/THANKU.jpg"));
-        Image scaledImage = thankYouImage.getImage().getScaledInstance(500, 200, Image.SCALE_SMOOTH);  // Adjust the size as needed
-        JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
-
-        // Set the image label into the text area by adding it to a scroll pane
-        JScrollPane imageScrollPane = new JScrollPane(imageLabel);
-        imageScrollPane.setPreferredSize(new Dimension(400, 200));  // Set the preferred size of the image panel
-
-        // Add the scroll pane containing the image to the panel
-        add(imageScrollPane);
-
-        // Space between the text area and buttons
-        add(Box.createVerticalStrut(20));
-
-        // Button to place a new order
+        // Move to the next row for the button
+        gbc.gridy++;
+        
         JButton newOrderButton = new JButton("Place a New Order");
         newOrderButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         newOrderButton.addActionListener(e -> {
@@ -47,7 +38,18 @@ public class OrderConfirmationPanel extends JPanel {
             gui.addressField.setText("");  // Clear address field
             gui.cardLayout.show(gui.mainPanel, "CustomerInformation");  // Go back to customer info screen
         });
-        add(newOrderButton);
+        add(newOrderButton, gbc);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Draw the thank you image, scaling it to the full size of the panel
+        if (thankYouImage != null) {
+            int width = getWidth();
+            int height = getHeight();
+            g.drawImage(thankYouImage, 0, 0, width, height, this);  // Scale the image to cover the entire panel
+        }
     }
 
     // Optional method to set order details (if needed)

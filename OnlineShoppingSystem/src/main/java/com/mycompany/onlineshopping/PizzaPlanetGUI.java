@@ -3,7 +3,6 @@ package com.mycompany.onlineshopping;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 public class PizzaPlanetGUI extends JFrame {
 
@@ -69,8 +68,15 @@ public class PizzaPlanetGUI extends JFrame {
     }
 
     // Method to update the cart counter
-    public void updateCartCounter() {
-        cartCounter++;
+    public void updateCartCounter(boolean isAdding, int quantity) {
+        if (isAdding) {
+            cartCounter += quantity;
+        } else {
+            cartCounter = Math.max(0, cartCounter - quantity); // Decrement the counter based on quantity
+        }
+        if (cartCounter == 0) {
+            cartCounter = 0; // Ensure it resets to 0 when there are no items
+        }
         cartCounterLabel.setText(String.valueOf(cartCounter));
     }
 

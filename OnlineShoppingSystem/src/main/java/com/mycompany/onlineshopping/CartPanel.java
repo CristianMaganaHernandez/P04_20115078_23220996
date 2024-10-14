@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 public class CartPanel extends JPanel {
+
     private PizzaPlanetGUI gui;
 
     public CartPanel(PizzaPlanetGUI gui) {
@@ -100,10 +101,10 @@ public class CartPanel extends JPanel {
 
         cartItemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         cartItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         double totalItemPrice = itemPrice * quantity;
         // Label showing item details
-        JLabel productLabel = new JLabel(itemName + " - " + quantity + " pcs - $" + String.format("%.2f",totalItemPrice) + " ( $" + itemPrice + " each )");
+        JLabel productLabel = new JLabel(itemName + " - " + quantity + " pcs - $" + String.format("%.2f", totalItemPrice) + " ( $" + itemPrice + " each )");
         productLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         cartItemPanel.add(productLabel, BorderLayout.CENTER);
 
@@ -114,6 +115,7 @@ public class CartPanel extends JPanel {
         JButton removeButton = new JButton("Remove");
         removeButton.addActionListener(e -> {
             gui.cart.removeItem(itemName);
+            gui.updateCartCounter(false, 1); // Decrement the counter by 1
             updateCartPanel();
             gui.updateTotalPrice();
         });
@@ -122,6 +124,7 @@ public class CartPanel extends JPanel {
         JButton deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> {
             gui.cart.deleteItem(itemName);
+            gui.updateCartCounter(false, quantity); // Decrement the counter by the total quantity of the item
             updateCartPanel();
             gui.updateTotalPrice();
         });
