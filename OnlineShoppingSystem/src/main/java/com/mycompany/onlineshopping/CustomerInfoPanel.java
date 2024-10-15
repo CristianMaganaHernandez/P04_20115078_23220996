@@ -11,7 +11,7 @@ public class CustomerInfoPanel extends JPanel {
     public CustomerInfoPanel(PizzaPlanetGUI gui) {
         // Load the background image
         try {
-            backgroundImage = ImageIO.read(getClass().getClassLoader().getResource("Rick_MortyCustomerInfoPanelBackground_2.jpg"));
+            backgroundImage = ImageIO.read(getClass().getClassLoader().getResource("CustomerInfoPanelBackground.jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }
