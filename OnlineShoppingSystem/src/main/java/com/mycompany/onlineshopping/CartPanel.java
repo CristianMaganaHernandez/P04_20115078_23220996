@@ -112,7 +112,7 @@ public class CartPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         // 'Remove' button (removes one item)
-        JButton removeButton = new JButton("Remove");
+        JButton removeButton = new JButton("Remove Item");
         removeButton.addActionListener(e -> {
             gui.cart.removeItem(itemName);
             gui.updateCartCounter(false, 1); // Decrement the counter by 1
@@ -121,7 +121,7 @@ public class CartPanel extends JPanel {
         });
 
         // 'Delete' button (removes all items)
-        JButton deleteButton = new JButton("Delete");
+        JButton deleteButton = new JButton("Delete All");
         deleteButton.addActionListener(e -> {
             gui.cart.deleteItem(itemName);
             gui.updateCartCounter(false, quantity); // Decrement the counter by the total quantity of the item
